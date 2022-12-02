@@ -1,20 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createPage, updatePage } from "./services";
-import { getId } from "./services";
-
+import { createPage, updatePage, getId, getLinks } from "./services";
 export default async function handleRequest(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
     const { link } = req.body;
+    console.log("Server link: ", link);
     const id = await getId();
     if (id) {
-      const response = await updatePage(link);
-      res.status(200).json(response);
+      await updatePage(link);
+      const links = await getLinks();
+      res.status(201).json(links);
     } else {
-      const response = await createPage(link);
-      res.status(200).json(response);
+      await createPage(link);
+      const links = await getLinks();
+      res.status(201).json(links);
+    }
+  } else if (req.method === "GET") {
+    try {
+      const links = await getLinks();
+      res.status(200).json(links);
+    } catch (error) {
+      res.status(500).json({ error });
     }
   } else {
     res.status(404).json({ message: "Not Found" });

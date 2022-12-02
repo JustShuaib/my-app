@@ -1,24 +1,35 @@
-import { FormEvent, useState } from "react";
-import type { NextPage } from "next";
 import Head from "next/head";
+import { FormEvent, useState } from "react";
+import axios from "axios";
+import useSwr from "swr";
 
-const Home: NextPage = () => {
-  const [input, setInput] = useState("");
+const Home = () => {
+  const fetcher = (url: string) => axios(url).then((res) => res.data);
+  const poster = () => axios.post("/api", { link }).then((res) => res.data);
+  const { data, error, mutate } = useSwr<Array<{ url: string }>>(
+    "/api",
+    fetcher
+  );
+
+  const [link, setLink] = useState("");
   const makeRequest = async (e: FormEvent) => {
     e.preventDefault();
-    if (input.trim().length === 0) return;
-    console.log("Input: ", input);
-    setInput("");
-    const response = await fetch("/api", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ link: input }),
-    });
-    const data = await response.json();
-    console.log(data);
+    if (link.trim().length === 0) return;
+    setLink("");
+
+    try {
+      const oldData = data ? data : [];
+      mutate(poster, {
+        optimisticData: [...oldData, { url: link }],
+        rollbackOnError: true,
+        populateCache: true,
+        revalidate: false,
+      });
+    } catch (error) {
+      console.log("Error: ", error);
+    }
   };
+
   return (
     <>
       <Head>
@@ -34,15 +45,28 @@ const Home: NextPage = () => {
       <main>
         <form onSubmit={makeRequest}>
           <div>
-            <label htmlFor="input">Link</label>
+            <label htmlFor="link">Link</label>
             <input
-              id="input"
-              value={input}
-              onChange={({ target }) => setInput(target.value)}
+              id="link"
+              value={link}
+              onChange={({ target }) => setLink(target.value)}
             />
           </div>
           <button type="submit">Add</button>
         </form>
+        <section>
+          <h2>Here are the links saved for you</h2>
+          {error && <div>Failed to load links</div>}
+          <ul>
+            {data?.map(({ url }, index: number) => (
+              <li key={index}>
+                <a href={url} target="_blank" rel="noreferrer">
+                  {url}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       </main>
     </>
   );

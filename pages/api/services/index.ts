@@ -7,3 +7,4 @@ export { default as createPage } from "./createPage";
 export { default as updatePage } from "./updatePage";
 export { default as getId } from "./getId";
 export { default as formatResponse } from "./formatResponse";
+export { default as getLinks } from "./get-links";
