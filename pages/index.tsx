@@ -1,18 +1,28 @@
 import Head from "next/head";
-import { FormEvent, useState } from "react";
-import axios from "axios";
-import type { AxiosError } from "axios";
+import { FormEvent, useState, useEffect } from "react";
 import useSwr from "swr";
+import Offline from "../components/Offline";
 import homeStyles from "../styles/Home.module.css";
 
 const Home = () => {
-  const fetcher = (url: string) => axios(url).then((res) => res.data);
-  const poster = () => axios.post("/api", { link }).then((res) => res.data);
-  const { data, error, mutate } = useSwr<
-    Array<{ url: string }>,
-    AxiosError<{ message: string }>
-  >("/api", fetcher);
+  const [isOnline, setIsOnline] = useState(false);
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+  }, []);
 
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const poster = () =>
+    fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ link }),
+    }).then((res) => res.json());
+  const { data, error, mutate } = useSwr<Array<{ url: string }>>(
+    "/api",
+    fetcher
+  );
   const [link, setLink] = useState("");
   const makeRequest = async (e: FormEvent) => {
     e.preventDefault();
@@ -31,6 +41,7 @@ const Home = () => {
       console.log("Error: ", error);
     }
   };
+  if (!isOnline) return <Offline />;
 
   return (
     <>
@@ -59,19 +70,19 @@ const Home = () => {
             />
           </div>
           <button className={homeStyles.btn} type="submit">
-            Add
+            Add to Notion
           </button>
         </form>
-        {!data && !error && <p className={homeStyles.loading}>Loading...</p>}
+        {!data && !error && <p className={homeStyles.loading}>Loading... ⌛</p>}
         <section className={homeStyles.linksContainer}>
-          {error && <div> {error.response?.data?.message}</div>}
-          {data
-            ? data?.length > 0 && (
-                <h1 className={homeStyles.title}>
-                  Here are the links saved for you
-                </h1>
-              )
-            : ""}
+          {error && (
+            <div className={homeStyles.emptyLink}>No links saved yet... 🛒</div>
+          )}
+          {data && (
+            <h1 className={homeStyles.title}>
+              Here are the links saved for you
+            </h1>
+          )}
           <ol className={homeStyles.links}>
             {data?.map(({ url }, index: number) => (
               <li key={index}>

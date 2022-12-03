@@ -27,18 +27,11 @@ export default async function handleRequest(
       }
     }
   } else if (req.method === "GET") {
-    try {
-      const links = await getLinks();
+    const links = await getLinks();
+    if (links) {
       res.status(200).json(links);
-    } catch (error: any) {
-      let message = "Something went wrong";
-      if (error?.message === "Invalid request URL.") {
-        message = "No links saved yet.";
-        res.status(500).json({ message });
-      } else {
-        message = "Looks like you are offline.";
-        res.status(404).json({ message });
-      }
+    } else {
+      res.status(400).json({ error: "No links saved yet" });
     }
   } else {
     res.status(404).json({ message: "Not Found" });
