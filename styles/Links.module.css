@@ -11,10 +11,15 @@
   max-width: 90%;
 }
 .link:hover {
-  color: #fff;
+  color: #000;
 }
 @media screen and (min-width: 768px) {
   .link {
     max-width: 100%;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .link:hover {
+    color: #fff;
   }
 }

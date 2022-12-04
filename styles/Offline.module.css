@@ -7,15 +7,26 @@
 }
 .retryBtn {
   margin-top: 0.6rem;
-  border: 1px solid white;
+  border: 1px solid #000;
   border-radius: 5px;
-  background: #000;
+  background-color: #fff;
   padding: 0.4rem 2rem;
   cursor: pointer;
   transition: all 0.3s linear;
 }
 .retryBtn:hover {
-  background: #fff;
-  color: black;
-  font-weight: 600;
+  color: #fff;
+  background-color: #000;
+}
+@media (prefers-color-scheme: dark) {
+  .retryBtn {
+    background-color: #fff;
+    color: black;
+  }
+  .retryBtn:hover {
+    background-color: #fff;
+    color: black;
+
+    font-weight: 600;
+  }
 }
