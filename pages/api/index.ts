@@ -28,11 +28,7 @@ export default async function handleRequest(
     }
   } else if (req.method === "GET") {
     const links = await getLinks();
-    if (links) {
-      res.status(200).json(links);
-    } else {
-      res.status(400).json({ error: "No links saved yet" });
-    }
+    res.send(links);
   } else {
     res.status(404).json({ message: "Not Found" });
   }
